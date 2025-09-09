@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invest.io Dashboard</title>
+    <style>
+        /* Basic styling for our dashboard table */
+        body { font-family: sans-serif; padding: 2em; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .price-up { color: green; }
+        .price-down { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Nifty 100 Dashboard 📈</h1>
+    <button id="load-dashboard-button">Load Dashboard</button>
+    <div id="dashboard-container">
+        </div>
+
+    <script>
+        const loadButton = document.getElementById('load-dashboard-button');
+        const container = document.getElementById('dashboard-container');
+
+        loadButton.addEventListener('click', async () => {
+            container.innerHTML = '<h2>Loading data... Please wait.</h2>';
+            
+            // Call our new, powerful backend endpoint
+            const response = await fetch('/api/nifty100');
+            const stocks = await response.json();
+
+            // Start building the HTML for our table
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Current Price</th>
+                            <th>Day High</th>
+                            <th>Day Low</th>
+                            <th>Previous Close</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            // Loop through each stock object in the array we received
+            for (const stock of stocks) {
+                // Determine if price is up or down for styling
+                const priceClass = stock.currentPrice >= stock.previousClose ? 'price-up' : 'price-down';
+
+                tableHTML += `
+                    <tr>
+                        <td>${stock.longName} (${stock.symbol})</td>
+                        <td class="${priceClass}">${stock.currentPrice}</td>
+                        <td>${stock.dayHigh}</td>
+                        <td>${stock.dayLow}</td>
+                        <td>${stock.previousClose}</td>
+                    </tr>
+                `;
+            }
+
+            tableHTML += '</tbody></table>'; // Close the table tags
+            container.innerHTML = tableHTML; // Display the final table
+        });
+    </script>
+</body>
+</html>
